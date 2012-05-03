@@ -11,8 +11,10 @@ import java.util.Random;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.generator.BlockPopulator;
 import org.bukkit.generator.ChunkGenerator;
+import si.minecraftserver.bukkit.skygrid.utils.BlockFileReader;
 import si.minecraftserver.bukkit.skygrid.utils.Utils;
 
 /**
@@ -21,25 +23,19 @@ import si.minecraftserver.bukkit.skygrid.utils.Utils;
  */
 public class SkyGridGenerator extends ChunkGenerator {
 
-    private static final Material[] materials;
-    private static final Material[] exclude = new Material[]{
-        Material.AIR, Material.SAPLING, Material.WATER, Material.LAVA, Material.LEVER,
-        Material.BED_BLOCK, Material.BEDROCK, Material.POWERED_RAIL, Material.DETECTOR_RAIL,
-        Material.LONG_GRASS, Material.DEAD_BUSH, Material.PISTON_EXTENSION, Material.PISTON_MOVING_PIECE,
-        Material.TORCH, Material.FIRE, Material.MOB_SPAWNER, Material.WHEAT, Material.BURNING_FURNACE,
-        Material.SIGN_POST, Material.WOODEN_DOOR, Material.LADDER, Material.RAILS, Material.WALL_SIGN,
-        Material.STONE_PLATE, Material.WOOD_PLATE, Material.IRON_DOOR_BLOCK, Material.REDSTONE_TORCH_ON,
-        Material.STONE_BUTTON, Material.SNOW, Material.PORTAL, Material.DIODE_BLOCK_OFF, Material.DIODE_BLOCK_ON,
-        Material.LOCKED_CHEST, Material.TRAP_DOOR, Material.PUMPKIN_STEM, Material.MELON_STEM, Material.VINE,
-        Material.WATER_LILY, Material.NETHER_WARTS, Material.ENCHANTMENT_TABLE, Material.BREWING_STAND, Material.CAULDRON,
-        Material.ENDER_PORTAL, Material.DRAGON_EGG, Material.ENDER_PORTAL_FRAME, Material.REDSTONE_WIRE,
-        Material.REDSTONE_TORCH_OFF, Material.SEEDS, Material.DIAMOND_BLOCK, Material.GOLD_BLOCK};
+    private static Material[] materials;
+    private BlockFileReader blockFileReader;
+    private int height = 70;
+    private int blockSpace = 4;
 
-    static {
+    public SkyGridGenerator(FileConfiguration config, BlockFileReader blockFileReader) {
+        height = config.getInt("map_height", height);
+        blockSpace = config.getInt("block_space", blockSpace);
+        this.blockFileReader = blockFileReader;
         LinkedList<Material> ms = new LinkedList<Material>();
         Material m1[] = Material.values();
         for (Material m : m1) {
-            if (m.isBlock() && !excluded(m)) {
+            if (m.isBlock() && blockFileReader.excluded(m)) {
                 ms.add(m);
             }
         }
@@ -47,15 +43,6 @@ public class SkyGridGenerator extends ChunkGenerator {
         for (int i = 0; i < materials.length; i++) {
             materials[i] = ms.get(i);
         }
-    }
-
-    private static boolean excluded(Material m) {
-        for (Material m1 : exclude) {
-            if (m1.getId() == m.getId()) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override
@@ -73,9 +60,9 @@ public class SkyGridGenerator extends ChunkGenerator {
         byte[] result = new byte[65536];
         int x, y, z;
 
-        for (x = 0; x < 16; x += 4) {
-            for (z = 0; z < 16; z += 4) {
-                for (y = 0; y < 70; y += 4) {
+        for (x = 0; x < 16; x += blockSpace) {
+            for (z = 0; z < 16; z += blockSpace) {
+                for (y = 0; y < height; y += blockSpace) {
                     result[Utils.convertToByte(x, y, z)] = (byte) materials[(int) (random.nextDouble() * materials.length)].getId();
                 }
             }
