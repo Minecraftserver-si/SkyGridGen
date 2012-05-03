@@ -1,7 +1,0 @@
-author: Minecraftserver.si[Kekec852]
-main: si.minecraftserver.bukkit.skygrid.SkyGrid
-name: SkyGrid
-load: startup
-version: '1.0'
-description: Costume world generator for our server.
-depend: [ MCServerCore ]
