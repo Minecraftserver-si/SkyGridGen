@@ -5,7 +5,6 @@
 package si.minecraftserver.bukkit.skygrid.generator;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import org.bukkit.Location;
@@ -36,17 +35,7 @@ public class SkyGridGenerator extends ChunkGenerator {
         fillChest = config.getBoolean("fill_chest", fillChest);
         colorWool = config.getBoolean("color_wool", colorWool);
         this.blockFileReader = blockFileReader;
-        LinkedList<Material> ms = new LinkedList<Material>();
-        Material m1[] = Material.values();
-        for (Material m : m1) {
-            if (m.isBlock() && blockFileReader.excluded(m)) {
-                ms.add(m);
-            }
-        }
-        materials = new Material[ms.size()];
-        for (int i = 0; i < materials.length; i++) {
-            materials[i] = ms.get(i);
-        }
+        materials = Utils.getAllowedMaterials(blockFileReader);
     }
 
     @Override

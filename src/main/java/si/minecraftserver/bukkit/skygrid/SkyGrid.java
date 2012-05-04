@@ -6,7 +6,6 @@ package si.minecraftserver.bukkit.skygrid;
 
 import java.io.*;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -14,6 +13,7 @@ import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.java.JavaPlugin;
 import si.minecraftserver.bukkit.skygrid.generator.SkyGridGenerator;
 import si.minecraftserver.bukkit.skygrid.utils.BlockFileReader;
+import si.minecraftserver.bukkit.skygrid.utils.Utils;
 
 /**
  *
@@ -39,7 +39,7 @@ public class SkyGrid extends JavaPlugin {
             if (f.exists()) {
                 config.load(f);
             } else {
-                copyResource(f);
+                Utils.copyResource(f, getClass());
             }
         } catch (FileNotFoundException ex) {
             Bukkit.getLogger().log(Level.SEVERE, null, ex);
@@ -53,23 +53,6 @@ public class SkyGrid extends JavaPlugin {
     @Override
     public ChunkGenerator getDefaultWorldGenerator(String worldName, String id) {
         return new SkyGridGenerator(config, blockFileReader);
-    }
-
-    private void copyResource(File config) {
-        try {
-            InputStream in = getClass().getResourceAsStream("/" + CONFIG_NAME);
-            FileOutputStream out = new FileOutputStream(config);
-            byte[] buff = new byte[512];
-            int i;
-            while ((i = in.read(buff)) != -1) {
-                out.write(buff, 0, i);
-            }
-            out.close();
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(BlockFileReader.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(BlockFileReader.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
     
     public static SkyGrid getInstance(){
