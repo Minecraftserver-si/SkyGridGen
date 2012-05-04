@@ -3,3 +3,6 @@ map_height: 70
 block_space: 4
 fill_chest: true
 color_wool: true
+grow_on_grass_or_dirt: true
+grow_on_water: true
+grow_on_send: true

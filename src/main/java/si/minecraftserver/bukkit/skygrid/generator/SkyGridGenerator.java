@@ -5,6 +5,8 @@
 package si.minecraftserver.bukkit.skygrid.generator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import org.bukkit.Location;
@@ -28,12 +30,21 @@ public class SkyGridGenerator extends ChunkGenerator {
     private int blockSpace = 4;
     private boolean fillChest = true;
     private boolean colorWool = true;
+    private boolean growOnGrassOrDirt = true;
+    private boolean growOnWater = true;
+    private boolean growOnSend = true;
+    private int[] onGrassOrDirt = new int[]{6, 31, 37, 38, 39, 40};
+    private int[] onWater = new int[]{111};
+    private int[] onSend = new int[]{32, 81};
 
     public SkyGridGenerator(FileConfiguration config, BlockFileReader blockFileReader) {
         height = config.getInt("map_height", height);
         blockSpace = config.getInt("block_space", blockSpace);
         fillChest = config.getBoolean("fill_chest", fillChest);
         colorWool = config.getBoolean("color_wool", colorWool);
+        growOnGrassOrDirt = config.getBoolean("grow_on_grass_or_dirt", growOnGrassOrDirt);
+        growOnWater = config.getBoolean("grow_on_water", growOnWater);
+        growOnSend = config.getBoolean("grow_on_send", growOnSend);
         this.blockFileReader = blockFileReader;
         materials = Utils.getAllowedMaterials(blockFileReader);
     }
@@ -57,10 +68,30 @@ public class SkyGridGenerator extends ChunkGenerator {
             for (z = 0; z < 16; z += blockSpace) {
                 for (y = 0; y < height; y += blockSpace) {
                     int id = materials[(int) (random.nextDouble() * materials.length)].getId();
-                    if(id == Material.CHEST.getId() && fillChest){
+                    if (id == Material.GRASS.getId() && growOnGrassOrDirt) {
+                        if (y + 1 < world.getMaxHeight()) {
+                            result[Utils.convertToByte(x, y + 1, z)] = (byte) onGrassOrDirt[(int) (random.nextDouble() * onGrassOrDirt.length)];
+                        }
+                    }
+                    if (id == Material.DIRT.getId() && growOnGrassOrDirt) {
+                        if (y + 1 < world.getMaxHeight() && random.nextBoolean()) {
+                            result[Utils.convertToByte(x, y + 1, z)] = (byte) onGrassOrDirt[(int) (random.nextDouble() * onGrassOrDirt.length)];
+                        }
+                    }
+                    if (id == Material.STATIONARY_WATER.getId() && growOnWater) {
+                        if (y + 1 < world.getMaxHeight() && random.nextBoolean()) {
+                            result[Utils.convertToByte(x, y + 1, z)] = (byte) onWater[(int) (random.nextDouble() * onWater.length)];
+                        }
+                    }
+                    if (id == Material.SAND.getId() && growOnSend) {
+                        if (y + 1 < world.getMaxHeight() && random.nextBoolean()) {
+                            result[Utils.convertToByte(x, y + 1, z)] = (byte) onSend[(int) (random.nextDouble() * onSend.length)];
+                        }
+                    }
+                    if (id == Material.CHEST.getId() && fillChest) {
                         ChestAndWoolGenerator.generate(world, cX, cZ, x, y, z, random, ChestAndWoolGenerator.TYPE_CHEST, blockFileReader);
                     }
-                    if(id == Material.WOOL.getId() && colorWool){
+                    if (id == Material.WOOL.getId() && colorWool) {
                         ChestAndWoolGenerator.generate(world, cX, cZ, x, y, z, random, ChestAndWoolGenerator.TYPE_WOOL, blockFileReader);
                     }
                     result[Utils.convertToByte(x, y, z)] = (byte) id;
@@ -73,6 +104,6 @@ public class SkyGridGenerator extends ChunkGenerator {
 
     @Override
     public Location getFixedSpawnLocation(World world, Random random) {
-        return world.getBlockAt(0, 129, 0).getLocation();//Spawn no block!
+        return world.getBlockAt(0, Math.min(height + 1, world.getMaxHeight()), 0).getLocation();//Spawn no block!
     }
 }

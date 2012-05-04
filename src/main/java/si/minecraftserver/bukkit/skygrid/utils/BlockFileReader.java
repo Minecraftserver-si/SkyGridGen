@@ -17,7 +17,7 @@ import org.bukkit.Material;
  */
 public class BlockFileReader {
 
-    private static final String FILE_NAME = "ignor_blocks.lst";
+    private static final String FILE_NAME = "ignore_blocks.lst";
     private List<Integer> ids = new ArrayList<Integer>();
 
     public BlockFileReader(File dataFolder) {
