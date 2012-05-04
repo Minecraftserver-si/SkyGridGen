@@ -27,10 +27,14 @@ public class SkyGridGenerator extends ChunkGenerator {
     private BlockFileReader blockFileReader;
     private int height = 70;
     private int blockSpace = 4;
+    private boolean fillChest = true;
+    private boolean colorWool = true;
 
     public SkyGridGenerator(FileConfiguration config, BlockFileReader blockFileReader) {
         height = config.getInt("map_height", height);
         blockSpace = config.getInt("block_space", blockSpace);
+        fillChest = config.getBoolean("fill_chest", fillChest);
+        colorWool = config.getBoolean("color_wool", colorWool);
         this.blockFileReader = blockFileReader;
         LinkedList<Material> ms = new LinkedList<Material>();
         Material m1[] = Material.values();
@@ -52,7 +56,7 @@ public class SkyGridGenerator extends ChunkGenerator {
 
     @Override
     public boolean canSpawn(World world, int x, int z) {
-        return true;
+        return (x % blockSpace == 0 && z % blockSpace == 0);//spawn mobs only on blocks
     }
 
     @Override
@@ -63,7 +67,14 @@ public class SkyGridGenerator extends ChunkGenerator {
         for (x = 0; x < 16; x += blockSpace) {
             for (z = 0; z < 16; z += blockSpace) {
                 for (y = 0; y < height; y += blockSpace) {
-                    result[Utils.convertToByte(x, y, z)] = (byte) materials[(int) (random.nextDouble() * materials.length)].getId();
+                    int id = materials[(int) (random.nextDouble() * materials.length)].getId();
+                    if(id == Material.CHEST.getId() && fillChest){
+                        ChestAndWoolGenerator.generate(world, cX, cZ, x, y, z, random, ChestAndWoolGenerator.TYPE_CHEST, blockFileReader);
+                    }
+                    if(id == Material.WOOL.getId() && colorWool){
+                        ChestAndWoolGenerator.generate(world, cX, cZ, x, y, z, random, ChestAndWoolGenerator.TYPE_WOOL, blockFileReader);
+                    }
+                    result[Utils.convertToByte(x, y, z)] = (byte) id;
                 }
             }
         }
@@ -73,9 +84,6 @@ public class SkyGridGenerator extends ChunkGenerator {
 
     @Override
     public Location getFixedSpawnLocation(World world, Random random) {
-        int x = random.nextInt(200) - 100;
-        int z = random.nextInt(200) - 100;
-        int y = world.getHighestBlockYAt(x, z);
-        return new Location(world, x, y, z);
+        return world.getBlockAt(0, 129, 0).getLocation();//Spawn no block!
     }
 }

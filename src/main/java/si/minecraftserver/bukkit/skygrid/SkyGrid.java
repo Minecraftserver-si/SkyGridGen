@@ -22,11 +22,13 @@ import si.minecraftserver.bukkit.skygrid.utils.BlockFileReader;
 public class SkyGrid extends JavaPlugin {
 
     private static final String CONFIG_NAME = "config.yml";
+    private static SkyGrid instance;
     private FileConfiguration config;
     private BlockFileReader blockFileReader;
 
     @Override
     public void onEnable() {
+        instance = this;
         if (!getDataFolder().exists()) {
             getDataFolder().mkdir();
         }
@@ -49,10 +51,6 @@ public class SkyGrid extends JavaPlugin {
     }
 
     @Override
-    public void onDisable() {
-    }
-
-    @Override
     public ChunkGenerator getDefaultWorldGenerator(String worldName, String id) {
         return new SkyGridGenerator(config, blockFileReader);
     }
@@ -72,5 +70,9 @@ public class SkyGrid extends JavaPlugin {
         } catch (IOException ex) {
             Logger.getLogger(BlockFileReader.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    public static SkyGrid getInstance(){
+        return instance;
     }
 }

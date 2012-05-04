@@ -1,3 +1,5 @@
 ## SkyGrid config file
 map_height: 70
 block_space: 4
+fill_chest: true
+color_wool: true
